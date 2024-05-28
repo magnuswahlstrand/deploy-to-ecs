@@ -4,7 +4,7 @@ export default $config({
     app(input) {
         return {
             name: "deploy-to-ecs",
-            removal: input?.stage === "production" ? "retain" : "remove",
+            removal: input?.stage === "production" ? "remove" : "remove",
             home: "aws",
             providers: {
                 aws: {
@@ -18,7 +18,18 @@ export default $config({
 
         const cluster = new sst.aws.Cluster("EcsDemoCluster", {vpc});
 
-        const svc = cluster.addService("EcsDemoService", {
+        cluster.addService("EcsDemoService", {
+            public: {
+                ports: [
+                    {listen: "80/http", forward: "8000/http"},
+                ],
+            },
+        });
+        cluster.addService("EcsDemoServiceGo", {
+            image: {
+                context: "./src/go",
+                dockerfile: "./src/go/Dockerfile",
+            },
             public: {
                 ports: [
                     {listen: "80/http", forward: "8000/http"},
@@ -26,10 +37,6 @@ export default $config({
             },
         });
 
-        return {
-            ClusterARN: cluster.urn,
-            // Make this optional only for production
-            // ServiceURL: this.app?.stage ?? "http://localhost:3000",
-        };
+        return {};
     }
 });

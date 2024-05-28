@@ -21,5 +21,7 @@ func main() {
 	r.Get("/api", func(w http.ResponseWriter, r *http.Request) {
 		render.JSON(w, r, ApiResponse{Message: "Hello from the Go API!"})
 	})
-	http.ListenAndServe(":3000", r)
+	if err := http.ListenAndServe(":8000", r); err != nil {
+		panic(err)
+	}
 }
